@@ -6,12 +6,12 @@ Kingdom Commander is a Django-based service that uses `pywinauto` to automate in
 
 ## Table of Contents
 
-- [Features](##Features)
-- [Prerequisites](##Prerequisites)
-- [Installation](##Installation)
-- [Running the Project](#Running-the-project)
-- [API Endpoints](##Api-endpoints)
-- [Usage Examples](##Usage-examples)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Running the Project](#running-the-project)
+- [API Endpoints](#api-endpoints)
+- [Usage Examples](#api-endpoints)
 
 ## Features
 
@@ -28,36 +28,6 @@ Kingdom Commander is a Django-based service that uses `pywinauto` to automate in
 - Django 5.0.6
 - `pywinauto` library
 - Django REST framework
-
-## Project Structure
-####KingdomCommander/
-├── manage.py
-├── README.md
-├── requirements.txt
-├── core/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   ├── wsgi.py
-├── kingdomCommander/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── serializers.py
-│   ├── services/
-│       ├── pywinauto_service.py
-│   ├── tests/
-│       ├── __init__.py
-│       ├── test_views.py
-│       ├── test_services.py
-├── static/
-│   └── ...
-└── templates/
-    └── ...
 
 ## Installation
 
@@ -93,9 +63,9 @@ python manage.py runserver
 ```
 2. **Access the API at http://127.0.0.1:8000/api/.**
 
-#API Endpoints
+# API Endpoints
 
-##List Running Applications
+## List Running Applications
 - URL: /api/list_running_applications/
 - Method: **GET**
 - Description: Lists all running applications.
@@ -114,7 +84,7 @@ Response:
 ```
 
 
-##Connect to Application
+## Connect to Application
 URL: /api/connect_to_application/
 - Method: **POST**
 - Description: Connects to a running application.
@@ -134,7 +104,7 @@ Response
 }
 ```
 
-##Find Controls
+## Find Controls
 - URL: /api/find_controls/
 - Method: POST
 - Description: Finds and lists controls of the connected application.
@@ -155,7 +125,7 @@ Response:
   "controls": [...]
 }
 ```
-##Disconnect from Application
+## Disconnect from Application
 - URL: /api/disconnect_from_application/
 - Method: **POST**
 - Description: Disconnects from the connected application.
@@ -174,7 +144,7 @@ Response:
 }
 ```
 
-###Close Application
+## Close Application
 - URL: /api/close_application/
 - Method: **POST**
 - Description: Closes the connected application.
