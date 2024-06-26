@@ -38,7 +38,6 @@ def disconnect_from_application(app=connected_app):
     else:
         return {"status": "error", "message": "No application is connected"}
 
-
 def get_descendants(app, title):
     window = app.window(best_match=title)
     window.wait('visible')
@@ -92,6 +91,23 @@ def get_control_identifiers(window):
 
     elements = captured_output.split('\n')
     return elements
+
+def get_elements_by_control_type(window, control_type):
+    elements = window.children(control_type=control_type)
+    element_data = []
+    for el in elements:
+        element_data.append({
+            "window_text": el.window_text() if hasattr(el, 'window_text') else None,
+            "automation_id": el.automation_id() if hasattr(el, 'automation_id') else None,
+            "handle": el.handle if hasattr(el, 'handle') else None,
+            "rect": {
+                "left": el.rectangle().left,
+                "top": el.rectangle().top,
+                "right": el.rectangle().right,
+                "bottom": el.rectangle().bottom
+            } if hasattr(el, 'rectangle') else None
+        })
+    return element_data
 
 ## Rise of Kingdoms functions
 def close_rise_of_kingdoms(app):
