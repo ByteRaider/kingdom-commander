@@ -39,7 +39,7 @@ def disconnect_from_application(app=connected_app):
         return {"status": "error", "message": "No application is connected"}
 
 
-def find_controls(app, title):
+def get_descendants(app, title):
     window = app.window(best_match=title)
     window.wait('visible')
     elements = window.descendants()
@@ -65,6 +65,34 @@ def find_controls(app, title):
             controls_info.append(control)
     return controls_info
 
+def get_control_identifiers(window):
+    # Import the io 
+    import io
+    # and sys modules
+    import sys
+    # to capture the output
+    # since method is designed primarily for printing control identifiers to the console for debugging purposes
+    # Create a string buffer to capture output
+    buffer = io.StringIO()
+    # Redirect stdout to the buffer
+    sys.stdout = buffer
+
+    try:
+        # Call the pywinauto print_control_identifiers method
+        window.print_control_identifiers()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+    # Restore stdout to its original state
+    sys.stdout = sys.__stdout__
+    # Get the content from buffer
+    captured_output = buffer.getvalue()
+    # Close the buffer
+    buffer.close()
+
+    elements = captured_output.split('\n')
+    return elements
+
 ## Rise of Kingdoms functions
 def close_rise_of_kingdoms(app):
     window = app.window(title_re=".*Rise of Kingdoms")
@@ -78,3 +106,8 @@ def connect_to_rise_of_kingdoms():
     request.session['title'] = connected_app.window(title_re=".*Rise of Kingdoms").window_text()
     return connected_app
 
+def riseKingdoms():
+    app = connect_to_rise_of_kingdoms(
+    
+    )
+    return close_rise_of_kingdoms(app)
