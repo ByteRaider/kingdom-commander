@@ -9,11 +9,13 @@ from .services.pywinauto_service import (
     list_running_applications,
     connect_to_application,
     disconnect_from_application,
-    get_control_identifiers
+    get_control_identifiers,
+    get_ui_elements,
+    get_elements_by_control_type
     
 
 )
-from .serializers import ControlInfoSerializer, RunningApplicationSerializer
+from .serializers import ControlInfoSerializer, RunningApplicationSerializer, UIElementsSerializer
 
 # Lock for ensuring single access to the application
 app_lock = threading.Lock()
@@ -43,7 +45,6 @@ def connect_to_application_view(request):
             return Response({"status": "error", "message": f"Failed to connect to application. Error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['POST'])
 def find_descendants_view(request):
     try:
@@ -60,7 +61,6 @@ def find_descendants_view(request):
         controls_info = get_descendants(app, title)
         serializer = ControlInfoSerializer(controls_info, many=True)
         return Response({"status": "success", "controls": serializer.data})
-
 
 @api_view(['POST'])
 def print_control_identifiers_view(request):
@@ -80,6 +80,27 @@ def print_control_identifiers_view(request):
             #serializer = PrintControlIdentifiersSerializer({"control_identifiers": control_identifiers})
             #return Response({"status": "success", "control_identifiers": serializer.data['control_identifiers']})
             return Response({"status": "success", "control_identifiers": control_identifiers})
+        except Exception as e:
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+def get_ui_elements_view(request):
+    title = request.data.get('title')
+    process_id = request.data.get('process_id')
+    handle = request.data.get('handle')
+    class_name = request.data.get('class_name')
+
+    if not (title or process_id or handle or class_name):
+        return Response({"status": "error", "message": "Either title, process_id, handle, or class_name must be provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+    with app_lock:
+        try:
+            app = connect_to_application(request, title=title, process_id=process_id, handle=handle, class_name=class_name)
+            window = app.window(best_match=title)
+            elements = get_ui_elements(window)
+            
+            serializer = UIElementsSerializer(elements)
+            return Response({"status": "success", "elements": serializer.data})
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
