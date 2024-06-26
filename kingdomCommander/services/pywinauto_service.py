@@ -108,6 +108,31 @@ def get_elements_by_control_type(window, control_type):
             } if hasattr(el, 'rectangle') else None
         })
     return element_data
+    
+def get_ui_elements(window):
+    elements = {
+        "images": get_elements_by_control_type(window, "Image"),
+        "static_texts": get_elements_by_control_type(window, "Text"),
+        "comboboxes": get_elements_by_control_type(window, "ComboBox"),
+        "edit_fields": get_elements_by_control_type(window, "Edit"),
+        "buttons": get_elements_by_control_type(window, "Button")
+    }
+    return elements
+
+def get_images(window):
+    return window.children(control_type="Image")
+
+def get_static_texts(window):
+    return window.children(control_type="Text")
+
+def get_comboboxes(window):
+    return window.children(control_type="ComboBox")
+
+def get_edit_fields(window):
+    return window.children(control_type="Edit")
+
+def get_buttons(window):
+    return window.children(control_type="Button")
 
 ## Rise of Kingdoms functions
 def close_rise_of_kingdoms(app):
