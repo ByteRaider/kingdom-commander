@@ -60,3 +60,9 @@ class UIElementsSerializer(serializers.Serializer):
     comboboxes = ComboBoxSerializer(many=True)
     edit_fields = EditFieldSerializer(many=True)
     buttons = ButtonSerializer(many=True)
+
+class ChildWindowSerializer(serializers.Serializer):
+    window_text = serializers.CharField()
+    automation_id = serializers.CharField()
+    handle = serializers.IntegerField()
+    rect = RectSerializer()
