@@ -1,4 +1,5 @@
 from pywinauto import Application, Desktop
+import threading
 
 connected_app = None
 
@@ -14,7 +15,11 @@ def list_running_applications():
     } for win in windows]
     return running_apps
 
-def connect_to_application(request, title=None, process_id=None, handle=None, class_name=None):
+def connect_to_application(request):
+    title = request.data.get('title')
+    process_id = request.data.get('process_id')
+    handle = request.data.get('handle')
+    class_name = request.data.get('class_name')
     global connected_app
     if title:
         connected_app = Application(backend="uia").connect(best_match=title)
@@ -25,7 +30,7 @@ def connect_to_application(request, title=None, process_id=None, handle=None, cl
     elif class_name:
         connected_app = Application(backend="uia").connect(class_name=class_name)
     else:
-        raise ValueError("Either title, process_id, handle, or class_name must be provided")
+        raise ValueError(" FAILED CONNECTING TO APPLICATION")
 
     request.session['title'] = connected_app.window(best_match=title).window_text()
     return connected_app
@@ -134,6 +139,50 @@ def get_edit_fields(window):
 def get_buttons(window):
     return window.children(control_type="Button")
 
+
+def get_child_window_details(window, auto_id, control_type):
+    child = window.child_window(auto_id=auto_id, control_type=control_type)
+    try:
+        details = {
+            "window_text": child.window_text() if hasattr(child, 'window_text') else None,
+            "automation_id": child.automation_id() if hasattr(child, 'automation_id') else None,
+            "handle": child.handle if hasattr(child, 'handle') else None,
+            "rect": {
+                "left": child.rectangle().left,
+                "top": child.rectangle().top,
+                "right": child.rectangle().right,
+                "bottom": child.rectangle().bottom
+            } if hasattr(child, 'rectangle') else None
+        }
+        return {"status": "success", "details": details}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def get_child_window_control_identifiers(window, auto_id, control_type):
+        # Import the io 
+    import io
+    # and sys modules
+    import sys
+    # to capture the output
+    # since method is designed primarily for printing control identifiers to the console for debugging purposes
+    # Create a string buffer to capture output
+    buffer = io.StringIO()
+    # Redirect stdout to the buffer
+    sys.stdout = buffer
+    try:
+        window.child_window(auto_id=auto_id, control_type=control_type).print_control_identifiers()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+    # Restore stdout to its original state
+    sys.stdout = sys.__stdout__
+    # Get the content from buffer
+    captured_output = buffer.getvalue()
+    # Close the buffer
+    buffer.close()
+
+    child = captured_output.split('\n')
+    return {"status": "success", "control_identifiers": child}
 ## Rise of Kingdoms functions
 
 
