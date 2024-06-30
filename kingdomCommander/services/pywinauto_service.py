@@ -139,7 +139,6 @@ def get_edit_fields(window):
 def get_buttons(window):
     return window.children(control_type="Button")
 
-
 def get_child_window_details(window, auto_id, control_type):
     child = window.child_window(auto_id=auto_id, control_type=control_type)
     try:
@@ -170,7 +169,11 @@ def get_child_window_control_identifiers(window, auto_id, control_type):
     # Redirect stdout to the buffer
     sys.stdout = buffer
     try:
-        window.child_window(auto_id=auto_id, control_type=control_type).print_control_identifiers()
+        if request.session['title'] and request.session['auto_id'] and request.session['control_type'] is not None:
+            window.child_window(title = title, auto_id=auto_id, control_type=control_type).print_control_identifiers()
+        else: 
+            window.child_window(auto_id=auto_id, control_type=control_type).print_control_identifiers()
+       
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -183,6 +186,22 @@ def get_child_window_control_identifiers(window, auto_id, control_type):
 
     child = captured_output.split('\n')
     return {"status": "success", "control_identifiers": child}
+
+def get_child_window_wrapper_object(window):
+    window.child_window(title = title, auto_id=auto_id, control_type=control_type).wrapper_object()
+    return window.child_window_wrapper_object()
+
+def get_element_wrapper_object(window, title=None, auto_id=None, control_type="Button", index=0, **kwargs):
+    if title:
+        matches = window.children(title=title, control_type=control_type, **kwargs)
+    elif auto_id:
+        matches = window.children(automation_id=auto_id, control_type=control_type, **kwargs)
+    else:
+        raise ValueError("Either title or auto_id must be provided to get a button")
+    if len(matches) > 1:
+        return matches[index].wrapper_object()
+    else:
+        return matches[0].wrapper_object()
 ## Rise of Kingdoms functions
 
 
@@ -234,3 +253,5 @@ class RiseOfKingdomsThread(threading.Thread):
 
         elements = captured_output.split('\n')
         return elements
+
+  
