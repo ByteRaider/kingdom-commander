@@ -37,8 +37,9 @@ def connect_to_application(request):
 
 def disconnect_from_application(app=connected_app):
     if app:
-        app.kill()
+        #   app.kill() or app.close() or app.terminate() or app.quit() or app.stop() or app.hangup()
         connected_app = None
+        request.session['title'] = None
         return {"status": "success", "message": "Disconnected from application"}
     else:
         return {"status": "error", "message": "No application is connected"}
@@ -187,6 +188,7 @@ def get_child_window_control_identifiers(window, auto_id, control_type):
     child = captured_output.split('\n')
     return {"status": "success", "control_identifiers": child}
 
+####  wrapper objects #####
 def get_child_window_wrapper_object(window):
     window.child_window(title = title, auto_id=auto_id, control_type=control_type).wrapper_object()
     return window.child_window_wrapper_object()
@@ -202,56 +204,5 @@ def get_element_wrapper_object(window, title=None, auto_id=None, control_type="B
         return matches[index].wrapper_object()
     else:
         return matches[0].wrapper_object()
-## Rise of Kingdoms functions
+####
 
-
-class RiseOfKingdomsThread(threading.Thread):
-    def __init__(self, app, thread_name):
-        threading.Thread.__init__(self)
-        self.app = app
-        self.thread_name = thread_name
-
-    def run(self):
-        self.app = connect_to_rise_of_kingdoms()
-    
-    def connect_to_rise_of_kingdoms():
-        global connected_app
-        connected_app = Application(backend="uia").connect(title_re=".*Rise of Kingdoms")
-        request.session['title'] = connected_app.window(title_re=".*Rise of Kingdoms").window_text()
-        return connected_app
-
-    def close_rise_of_kingdoms(app):
-        window = app.window(title_re=".*Rise of Kingdoms")
-        window.menu_select("File -> Exit")
-        window.child_window(title="Don't Save", auto_id="CommandButton_7", control_type="Button").click()
-        return "Rise of Kingdoms closed successfully."
-
-    def id_1001_control_identifiers(window):
-        # Import the io 
-        import io
-        # and sys modules
-        import sys
-        # to capture the output
-        # since method is designed primarily for printing control identifiers to the console for debugging purposes
-        # Create a string buffer to capture output
-        buffer = io.StringIO()
-        # Redirect stdout to the buffer
-        sys.stdout = buffer
-
-        try:
-            # Call the pywinauto print_control_identifiers method
-            window.child_window(auto_id="1001", control_type="Image").print_control_identifiers()
-        except Exception as e:
-            return {"status": "error", "message": str(e)}
-
-        # Restore stdout to its original state
-        sys.stdout = sys.__stdout__
-        # Get the content from buffer
-        captured_output = buffer.getvalue()
-        # Close the buffer
-        buffer.close()
-
-        elements = captured_output.split('\n')
-        return elements
-
-  
