@@ -2,8 +2,8 @@ import threading
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from .services.riseOfKingdoms_service import (rise_of_kingdoms_bot)
 from .services.pywinauto_service import (
-    
     get_descendants,  
     list_running_applications,
     connect_to_application,
@@ -13,10 +13,7 @@ from .services.pywinauto_service import (
     get_elements_by_control_type, 
     get_child_window_details,
     get_child_window_control_identifiers,
-    RiseOfKingdomsThread,
-
     
-
 )
 from .serializers import (ControlInfoSerializer, RectSerializer,
 RunningApplicationSerializer,ImageSerializer,StaticTextSerializer,ComboBoxSerializer, EditFieldSerializer, ButtonSerializer,
@@ -140,29 +137,36 @@ def get_child_window_view(request):
 @api_view(['POST'])
 def get_child_window_control_identifiers_view(request):
     title = request.data.get('title')
-    process_id = request.data.get('process_id')
-    handle = request.data.get('handle')
-    class_name = request.data.get('class_name')
+    #process_id = request.data.get('process_id')
+    #handle = request.data.get('handle')
+    #class_name = request.data.get('class_name')
     auto_id = request.data.get('auto_id')
     control_type = request.data.get('control_type')
 
-    if not (title or process_id or handle or class_name):
-        return Response({"status": "error", "message": "Either title, process_id, handle, or class_name must be provided"}, status=status.HTTP_400_BAD_REQUEST)
-    
     if not (auto_id and control_type):
         return Response({"status": "error", "message": "Both auto_id and control_type must be provided"}, status=status.HTTP_400_BAD_REQUEST)
 
     with app_lock:
-        try:
-            app = connect_to_application(request)
-            window = app.window(best_match=title)
-            result = get_child_window_control_identifiers(window, auto_id, control_type)
-            if result["status"] == "error":
-                return Response(result, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"status": "success", f"{control_type}s": result["control_identifiers"]})
-        except Exception as e:
-            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+        if control_type and auto_id:
+            try:
+                if title in request.session:
+                    app =  connect_to_application(request.session[title])
+                else:
+                    # connect to app and send title in the request
+                    try:
+                        app = connect_to_application(request)
+                    except Exception as e:
+                        return Response({"status": "error", "message": f" Failed to connect to application. Error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                window = app.window(best_match=title)
+                window_child = get_child_window_control_identifiers(window, auto_id, control_type)
+                result = window_child 
+                if result["status"] == "error":
+                    return Response(result, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": "success", f"{control_type}s": result["control_identifiers"]})
+            except Exception as e:
+                return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['POST'])
 def close_application_view(request):
     with app_lock:
@@ -176,3 +180,4 @@ def disconnect_from_application_view(request):
     with app_lock:
         response_message = disconnect_from_application()
         return Response({"status": "success", "message": response_message})
+
