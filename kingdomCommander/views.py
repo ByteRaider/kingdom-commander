@@ -23,13 +23,18 @@ UIElementsSerializer, ChildWindowSerializer
 # Lock for ensuring single access to the application
 app_lock = threading.Lock()
 
-
+# Get list of running applications (Title, Process ID, Handle, Class Name)
+# URL: /api/list_running_applications/
+# GET Parameters: None
 @api_view(['GET'])
 def list_running_applications_view(request):
     running_apps = list_running_applications()
     serializer = RunningApplicationSerializer(running_apps, many=True)
     return Response({"status": "success", "applications": serializer.data})
 
+# Connect to an application
+# URL: /api/connect_to_application/
+# POST Parameters: title, process_id, handle, class_name
 @api_view(['POST'])
 def connect_to_application_view(request):
     title = request.data.get('title')
@@ -48,6 +53,9 @@ def connect_to_application_view(request):
             return Response({"status": "error", "message": f"Failed to connect to application. Error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Disconnect from an application
+# URL: /api/disconnect_from_application/
+# POST Parameters: None
 @api_view(['POST'])
 def find_descendants_view(request):
     try:
@@ -65,6 +73,9 @@ def find_descendants_view(request):
         serializer = ControlInfoSerializer(controls_info, many=True)
         return Response({"status": "success", "controls": serializer.data})
 
+# Print Control Identifiers
+# URL: /api/print_control_identifiers/
+# POST Parameters: title, process_id, handle, class_name
 @api_view(['POST'])
 def print_control_identifiers_view(request):
     title = request.data.get('title')
@@ -86,6 +97,9 @@ def print_control_identifiers_view(request):
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Get UI Elements
+# URL: /api/get_ui_elements/
+# POST Parameters: title, process_id, handle, class_name
 @api_view(['POST'])
 def get_ui_elements_view(request):
     title = request.data.get('title')
@@ -107,6 +121,9 @@ def get_ui_elements_view(request):
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Get Child Window Details
+# URL: /api/get_child_window/
+# POST Parameters: title, process_id, handle, class_name
 @api_view(['POST'])
 def get_child_window_view(request):
     title = request.data.get('title')
@@ -134,6 +151,9 @@ def get_child_window_view(request):
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Get Child Window Control Identifiers
+# URL: /api/get_child_window_control_identifiers/
+# POST Parameters: title, process_id, handle, class_name
 @api_view(['POST'])
 def get_child_window_control_identifiers_view(request):
     title = request.data.get('title')
@@ -167,6 +187,9 @@ def get_child_window_control_identifiers_view(request):
             except Exception as e:
                 return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# Close Application
+# URL: /api/close_application/
+# POST Parameters: title
 @api_view(['POST'])
 def close_application_view(request):
     with app_lock:
@@ -175,9 +198,11 @@ def close_application_view(request):
         response_message = close_rise_of_kingdoms(app)
         return Response({"status": "success", "message": response_message})
 
+# Disconnect from Application
+# URL: /api/disconnect_from_application/
+# POST Parameters: None
 @api_view(['POST'])
 def disconnect_from_application_view(request):
     with app_lock:
         response_message = disconnect_from_application()
         return Response({"status": "success", "message": response_message})
-
