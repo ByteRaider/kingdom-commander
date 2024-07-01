@@ -158,6 +158,9 @@ def get_child_window_details(window, auto_id, control_type):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+def child_window_return(window, auto_id, control_type):
+    return window.child_window(auto_id=auto_id, control_type=control_type)
+
 def get_child_window_control_identifiers(window, auto_id, control_type):
         # Import the io 
     import io
@@ -170,10 +173,13 @@ def get_child_window_control_identifiers(window, auto_id, control_type):
     # Redirect stdout to the buffer
     sys.stdout = buffer
     try:
-        if request.session['title'] and request.session['auto_id'] and request.session['control_type'] is not None:
-            window.child_window(title = title, auto_id=auto_id, control_type=control_type).print_control_identifiers()
-        else: 
-            window.child_window(auto_id=auto_id, control_type=control_type).print_control_identifiers()
+        if auto_id and control_type:
+            child_window_return(window, auto_id, control_type).print_control_identifiers()
+        else:
+            child_window_return(window, request.session['auto_id'], request.session['control_type']).print_control_identifiers()
+    except Exception as e:
+        return {"status": "error", "message": f"Service failed to print control identifiers for child window. Error: {e}"}
+            
        
     except Exception as e:
         return {"status": "error", "message": str(e)}
