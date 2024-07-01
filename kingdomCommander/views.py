@@ -206,3 +206,20 @@ def disconnect_from_application_view(request):
     with app_lock:
         response_message = disconnect_from_application()
         return Response({"status": "success", "message": response_message})
+
+
+
+###############################################################
+###############################################################
+############# Rise of Kingdoms Bot Views    ###################
+###############################################################
+###############################################################
+@api_view(['POST'])
+# Connect to Rise of Kingdoms Bot
+def connect_to_rise_of_kingdoms_view(request):
+    with app_lock:
+        try:
+            app = rise_of_kingdoms_bot.connect_to_rise_of_kingdoms()
+            return Response({"status": "success", "message": "Connected to Rise of Kingdoms"})
+        except Exception as e:
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
